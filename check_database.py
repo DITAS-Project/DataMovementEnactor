@@ -1,4 +1,5 @@
 import MySQLdb
+from .dal_client import start_data_movement
 
 
 def compile_sql_query(operation, table_name, insert_order, values, where_cond=None):
@@ -82,5 +83,10 @@ while True:
         sql_query = compile_sql_query(operation=result[2], table_name=result[1],
                                       insert_order=table_cols, values=result[3], where_cond=where_cond)
         print(sql_query)
+
+        try:
+            start_data_movement(query=sql_query, path='/test')
+        except Exception as e:
+            print('Failed sending gRPC call: {}'.format(e))
 
 
