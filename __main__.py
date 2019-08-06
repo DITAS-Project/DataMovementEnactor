@@ -3,7 +3,7 @@
 from multiprocessing import Process
 
 import connexion
-from .check_database import dme_agent
+from check_database import dme_agent
 from swagger_server import encoder
 
 
@@ -13,7 +13,7 @@ def main():
     p = Process(target=dme_agent)
     app.add_api('swagger.yaml', arguments={'title': 'Data Movement Enactor'})
     p.start()
-    app.run(port=8080, use_reloader=False)
+    app.run(port=8888, use_reloader=False)
     p.join()
 
 

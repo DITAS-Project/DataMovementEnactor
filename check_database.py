@@ -1,7 +1,7 @@
 import time
 
 import MySQLdb
-from .dal_client import start_data_movement
+from dal_client import start_data_movement
 
 
 def compile_sql_query(operation, table_name, insert_order, values, where_cond=None):
