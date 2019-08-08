@@ -16,7 +16,7 @@ class DALClient:
     def process_async_response(self, future):
         print('Response received: {}'.format(future.result()))
 
-    def start_data_movement(self, query, path):
+    def send_start_data_movement(self, query, path):
         request = StartDataMovementRequest(query=query, sharedVolumePath=path)
         try:
             if self.async:
@@ -27,7 +27,7 @@ class DALClient:
         except Exception as e:
             raise Exception('Error sending StartDataMovement gRPC call {}'.format(e))
 
-    def finish_data_movement(self, path):
+    def send_finish_data_movement(self, path):
         request = FinishDataMovementRequest(sharedVolumePath=path)
         try:
             if self.async:
