@@ -2,7 +2,7 @@ import time
 import redis
 import MySQLdb
 
-from dal_client import send_start_data_movement
+from dal_client import DALClient
 
 
 class DME:
@@ -71,6 +71,7 @@ class DME:
 
         if not sym_data_table:
             raise Exception('sym_data table not found in database')
+        dal = DALClient(address='localhost', port=50051)
         r = self.connect_to_redis()
         last_id = 0
         while True:
@@ -110,6 +111,6 @@ class DME:
                                                        insert_order=table_cols, values=result[3], where_cond=where_cond)
                     print(sql_query)
 
-                    send_start_data_movement(query=sql_query, path='/test')
+                    dal.send_start_data_movement(query=sql_query, path='/test')
 
                 time.sleep(1)
