@@ -72,10 +72,10 @@ class DME:
         if not sym_data_table:
             raise Exception('sym_data table not found in database')
         dal = DALClient(address='localhost', port=50051)
-        r = self.connect_to_redis()
+        red = self.connect_to_redis()
         last_id = 0
         while True:
-            target = r.get('active_movement')
+            target = red.get('active_movement')
             if target:
                 cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
                 result = cursor.fetchone()
