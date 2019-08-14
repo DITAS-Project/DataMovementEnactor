@@ -1,0 +1,122 @@
+openapi: '3.0.0'
+info:
+  description: Data Movement Enactor API
+  version: 0.0.4
+  title: Data Movement Enactor
+  contact:
+    email: bogdan.despotov@cloudsigma.com
+servers: 
+  - url: http://0.0.0.0:{port}/dme
+    variables:
+      port: 
+        default: '8111'
+tags:
+  - name: Data Movement
+    description: Calls to enact and complete a data movement action
+paths:
+  '/init_movement/':
+    post:
+      summary: Initialize data movement for destination using transformation
+      tags:
+        - Data Movement
+      operationId: init_movement
+      requestBody:
+        description: DME JSON schema sent by the DS4M
+        required: True
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqBody'
+                
+      responses:
+          '200':
+            description: Success initializing data movement
+          '400':
+            description: Invalid data input
+  '/start_movement/':
+    post:
+      tags:
+        - Data Movement
+      summary: Communication between DMEs. Signals the other DME to prepare for movement
+      operationId: start_movement
+      requestBody:
+          description: Target path for creation
+          required: True
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/startDM'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Problem preparing for movement
+  '/finish_movement/':
+    get:
+      tags:
+        - Data Movement
+      description: Communication between DMEs. Indicates completed transfer between clusters. Relays finish call to DAL
+      operationId: finish_movement
+      responses:
+        '200':
+          description: Success completing transfer and sending finish call to DAL
+        '400':
+          description: Problem finishing movement or no active movement
+components:
+  schemas:
+    ReqBody:
+      type: object
+      properties:
+        dataSources:
+          type: array
+          items:
+            type: object
+            properties:
+              dataSource_id:
+                type: string
+              dataSource_type:
+                type: string
+              database:
+                $ref: '#/components/schemas/database'
+        movementsEnaction:
+          $ref: '#/components/schemas/movementsEnaction'
+    database:
+      type: array
+      items:
+        type: object
+        properties:
+          database_id:
+            type: string
+          tables:
+            type: array
+            items:
+              type: object
+              properties:
+                table_id: 
+                  type: string
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      column_id:
+                        type: string
+    movementsEnaction:
+      type: array
+      items:
+        type: object
+        properties:
+          from:
+            type: string
+          to:
+            type: string
+          transformation:
+            type: string
+          type:
+            type: string
+          
+    startDM:
+      type: object
+      properties:
+        target_path:
+          type: string

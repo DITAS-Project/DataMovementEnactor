@@ -7,14 +7,18 @@ from dal_client import DALClient
 
 class DME:
 
-    def __init__(self, db_user, db_pass, db_name, db_host, db_port, redis_host, redis_port):
+    def __init__(self, redis_host, redis_port, db_user=None, db_pass=None, db_name=None, db_host=None, db_port=None):
+        self.redis_host = redis_host
+        self.redis_port = redis_port
         self.db_user = db_user
         self.db_pass = db_pass
         self.db_name = db_name
         self.db_host = db_host
         self.db_port = db_port
-        self.redis_host = redis_host
-        self.redis_port = redis_port
+
+    def send_init_movement_request(self, sql_query, dal_address):
+        dal = DALClient(address=dal_address, port=50051)
+        dal.send_start_data_movement(query=sql_query, path='/test')
 
     def connect_to_data_source(self):
         try:
