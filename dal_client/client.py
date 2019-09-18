@@ -9,10 +9,9 @@ from data_sync.sync import DataSync
 
 class DALClient:
 
-    def __init__(self, address, port, destination, async=True):
+    def __init__(self, address, port, destination):
         self.address = address
         self.port = port
-        self.async = async
         self.destination = destination
         self.dal_msg_properties = None
         self.path = None
@@ -38,9 +37,9 @@ class DALClient:
                                            destinationPrivacyProperties=destinationPrivacyProperties)
         return request
 
-    def send_start_data_movement(self, request):
+    def send_start_data_movement(self, request, async=True):
         try:
-            if self.async:
+            if async:
                 call_future = self.stub.startDataMovement.future(request)
                 call_future.add_done_callback(self.process_start_movement_async_response)
             else:
