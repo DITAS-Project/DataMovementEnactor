@@ -20,8 +20,8 @@ class DataSync:
             raise Exception('Sync backend is not defined')
         try:
             cls = sync_backends[conf.sync_backend]
-            sync_method = getattr(cls, 'sync_data')
-            sync_method()
+            sync_method = getattr(cls(), 'sync_data')
+            sync_method(source_path=source_path, destination_host=destination_host, destination_path=destination_path)
         except KeyError:
             raise Exception('Incorrect sync backend')
 
@@ -39,7 +39,7 @@ class RsyncData(DataSync):
         code = p.wait()
         if code == 0:
             print('Rsync success')
-            self.finish_data_movement()
+            self.finish_data_movement(destination=destination_path)
 
 
 sync_backends = {

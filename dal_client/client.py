@@ -25,7 +25,8 @@ class DALClient:
                                                                                  authorization=authorization)
 
     def process_start_movement_async_response(self, future):
-        DataSync.sync_data(source_path=self.path, destination_path='{}:{}'.format(self.destination, self.path))
+        ds = DataSync()
+        ds.sync_data(source_path=self.path, destination_host=self.destination, destination_path=self.path)
         print('Response received: {}'.format(future.result()))
 
     def create_start_data_movement_request(self, query, sharedVolumePath, sourcePrivacyProperties=None,
