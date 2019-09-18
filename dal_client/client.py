@@ -7,29 +7,23 @@ from service_proto_buffers.dal_pb2 import StartDataMovementRequest
 from data_sync.sync import DataSync
 
 
-class DALMessageProperties:
-
-    def __init__(self, purpose, requesterId, authorization, token):
-        self.purpose = purpose
-        self.requesterId = requesterId
-        self.authorization = authorization + " " + token
-
-    def generate(self):
-        return DalMessageProperties__pb2.DalMessageProperties(purpose=self.purpose, requesterId=self.requesterId,
-                                                              authorization=self.authorization)
-
-
 class DALClient:
 
-    def __init__(self, address, port, destination, dal_msg_properties, async=True):
+    def __init__(self, address, port, destination, async=True):
         self.address = address
         self.port = port
         self.async = async
         self.destination = destination
-        self.dal_msg_properties = dal_msg_properties
+        self.dal_msg_properties = None
         self.path = None
         self.channel = grpc.insecure_channel('{}:{}'.format(address, port))
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
+
+    def generate_dal_message_properties(self, purpose, requesterId, authorization, token):
+        authorization = authorization + " " + token
+        self.dal_msg_properties = DalMessageProperties__pb2.DalMessageProperties(purpose=purpose,
+                                                                                 requesterId=requesterId,
+                                                                                 authorization=authorization)
 
     def process_start_movement_async_response(self, future):
         DataSync.sync_data(source_path=self.path, destination_path='{}:{}'.format(self.destination, self.path))
@@ -39,7 +33,7 @@ class DALClient:
                                            destinationPrivacyProperties=None):
         self.path = sharedVolumePath
         request = StartDataMovementRequest(query=query, sharedVolumePath=sharedVolumePath,
-                                           dalMesssageProperties=self.dal_msg_properties,
+                                           dalMessageProperties=self.dal_msg_properties,
                                            sourcePrivacyProperties=sourcePrivacyProperties,
                                            destinationPrivacyProperties=destinationPrivacyProperties)
         return request

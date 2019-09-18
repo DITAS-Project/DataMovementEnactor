@@ -13,8 +13,8 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import DalMessageProperties_pb2 as DalMessageProperties__pb2
-import DalPrivacyProperties_pb2 as DalPrivacyProperties__pb2
+import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
+import service_proto_buffers.DalPrivacyProperties_pb2 as DalPrivacyProperties__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
