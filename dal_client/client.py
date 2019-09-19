@@ -2,7 +2,7 @@ import grpc
 
 from service_proto_buffers import dal_pb2_grpc
 import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
-from service_proto_buffers.dal_pb2 import StartDataMovementRequest
+from service_proto_buffers.dal_pb2 import StartDataMovementRequest, FinishDataMovementRequest
 
 from data_sync.sync import DataSync
 
@@ -15,11 +15,16 @@ class DALClient:
         self.destination = destination
         self.dal_msg_properties = None
         self.path = None
+        self.token = None
         self.channel = grpc.insecure_channel('{}:{}'.format(address, port))
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
 
-    def generate_dal_message_properties(self, purpose, requesterId, authorization, token):
-        authorization = authorization + " " + token
+    def generate_access_token(self):
+        #TODO generate token based on keycloak credentials
+        pass
+
+    def generate_dal_message_properties(self, purpose, requesterId, authorization):
+        authorization = authorization + " " + self.token
         self.dal_msg_properties = DalMessageProperties__pb2.DalMessageProperties(purpose=purpose,
                                                                                  requesterId=requesterId,
                                                                                  authorization=authorization)
@@ -38,6 +43,15 @@ class DALClient:
                                            destinationPrivacyProperties=destinationPrivacyProperties)
         return request
 
+    def create_finish_data_movement_request(self, query, sharedVolumePath, sourcePrivacyProperties=None,
+                                            destinationPrivacyProperties=None):
+
+        request = FinishDataMovementRequest(query=query, sharedVolumePath=sharedVolumePath,
+                                            dalMessageProperties=self.dal_msg_properties,
+                                            sourcePrivacyProperties=sourcePrivacyProperties,
+                                            destinationPrivacyProperties=destinationPrivacyProperties)
+        return request
+
     def send_start_data_movement(self, request, async=True):
         try:
             if async:
@@ -47,3 +61,10 @@ class DALClient:
                 self.stub.startDataMovement(request)
         except Exception as e:
             raise Exception('Error sending StartDataMovement gRPC call {}'.format(e))
+
+    def send_finish_data_movement(self, request):
+        try:
+            self.stub.finishDataMovement(request)
+        except Exception as e:
+            raise Exception('Error sending finishDataMovement gRPC call {}'.format(e))
+

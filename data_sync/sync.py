@@ -3,6 +3,7 @@ import os.path
 from shutil import which
 
 from config import conf
+from dal_client.client import  DALClient
 
 
 class DataSync:
@@ -26,6 +27,10 @@ class DataSync:
             raise Exception('Incorrect sync backend')
 
     def finish_data_movement(self, destination):
+        dal = DALClient(destination, conf.dal_default_port, None)
+
+    def send_details_to_ds4m(self):
+        #TODO contact DS4M with the destination where the data has moved
         pass
 
 
