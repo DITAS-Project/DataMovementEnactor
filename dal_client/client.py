@@ -20,6 +20,7 @@ class DALClient:
         self.dal_msg_properties = None
         self.path = None
         self.token = None
+        self.query = None
         self.channel = grpc.insecure_channel('{}:{}'.format(address, port))
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
 
@@ -43,15 +44,18 @@ class DALClient:
         self.dal_msg_properties = DalMessageProperties__pb2.DalMessageProperties(purpose=purpose,
                                                                                  requesterId=requesterId,
                                                                                  authorization=authorization)
+        return self.dal_msg_properties
 
     def process_start_movement_async_response(self, future):
         ds = DataSync()
-        ds.sync_data(source_path=self.path, destination_host=self.destination, destination_path=self.path)
+        ds.sync_data(source_path=self.path, destination_host=self.destination, destination_path=self.path,
+                     query=self.query)
         print('Response received: {}'.format(future.result()))
 
     def create_start_data_movement_request(self, query, sharedVolumePath, sourcePrivacyProperties=None,
                                            destinationPrivacyProperties=None):
         self.path = sharedVolumePath
+        self.query = query
         request = StartDataMovementRequest(query=query, sharedVolumePath=sharedVolumePath,
                                            dalMessageProperties=self.dal_msg_properties,
                                            sourcePrivacyProperties=sourcePrivacyProperties,
