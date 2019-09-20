@@ -1,10 +1,14 @@
 import grpc
+import requests
+import sys
+import json
 
 from service_proto_buffers import dal_pb2_grpc
 import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
 from service_proto_buffers.dal_pb2 import StartDataMovementRequest, FinishDataMovementRequest
 
 from data_sync.sync import DataSync
+import config.conf as conf
 
 
 class DALClient:
@@ -20,10 +24,21 @@ class DALClient:
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
 
     def generate_access_token(self):
-        #TODO generate token based on keycloak credentials
-        pass
+        try:
+            r = requests.post(conf.keycloak_url, data=conf.keycloak_settings, verify=False)
+        except requests.exceptions.RequestException as e:
+            print('Could not connect to keycloak endpoint {}. Exception: {}'.format(conf.keycloak_url, e))
+            sys.exit(1)
+        try:
+            json_resp = json.loads(r.text)
+            self.token = json_resp['access_token']
+        except KeyError:
+            print('Could not fetch access token needed for DAL comm')
+            sys.exit(1)
+        return self.token
 
-    def generate_dal_message_properties(self, purpose, requesterId, authorization):
+    def generate_dal_message_properties(self, purpose='read', requesterId='requester', authorization='Bearer'):
+        self.generate_access_token()
         authorization = authorization + " " + self.token
         self.dal_msg_properties = DalMessageProperties__pb2.DalMessageProperties(purpose=purpose,
                                                                                  requesterId=requesterId,
