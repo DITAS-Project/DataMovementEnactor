@@ -1,11 +1,19 @@
 import connexion
 import six
+import logging
+import logging.config
+
 
 from swagger_server.models.req_body import ReqBody  # noqa: E501
 from swagger_server.models.start_dm import StartDM  # noqa: E501
 from swagger_server import util
 
 from movement_enactor.dme_orchestrator import DMOrchestrator
+from config import conf
+
+
+logging.config.dictConfig(conf.log_conf)
+LOG = logging.getLogger(__name__)
 
 
 def finish_movement():  # noqa: E501
@@ -46,6 +54,8 @@ def init_movement(body):  # noqa: E501
 
     dmo = DMOrchestrator(source=body.movements_enaction[0]['from'], destination=body.movements_enaction[0]['to'],
                          query_list=sql_queries)
+    LOG.debug('Sending queries to the DAL. Source: {}. destination: {}, queries: {}'.format(
+        body.movements_enaction[0]['from'], body.movements_enaction[0]['to'], sql_queries))
     dmo.send_queries_to_dal()
 
     return 'Initialized data movement', 200

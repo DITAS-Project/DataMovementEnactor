@@ -17,85 +17,16 @@
                            "column_id":"id"
                         }
                      ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_FS38ZU",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_UKZVHZ",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_66SZ4X",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_V3TRK1",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_ARKS8V",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
-                  },
-                  {
-                     "table_id":"I_XXC_MBXSLL_68SBRS",
-                     "columns":[
-                        {
-                           "column_id":"time"
-                        },
-                        {
-                           "column_id":"value"
-                        }
-                     ]
                   }
                ]
             }
          ]
-      },
+      }
    ],
-   "movementsEnaction":{
+   "movementsEnaction":[{
       "from":"178.22.71.88",
       "to":"ubuntu@shibboleth.zrh.cloudsigma.com",
-      "transformations":[
-         "Encryption",
-         "Aggregation"
-      ],
+      "transformations": "empty",
       "type":"DataDuplication"
-   }
+   }]
 }

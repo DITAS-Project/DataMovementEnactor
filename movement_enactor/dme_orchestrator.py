@@ -1,14 +1,19 @@
 import uuid
 import re
 import os
+import logging
+import logging.config
 
 from dal_client.client import DALClient
 from config import conf
 
+logging.config.dictConfig(conf.log_conf)
+LOG = logging.getLogger(__name__)
+
 
 class DMOrchestrator(object):
 
-    def __init__(self, source, destination, database, query_list):
+    def __init__(self, source, destination, query_list, database=None):
         self.source = source
         self.destination = destination
         self.database = database
@@ -34,8 +39,11 @@ class DMOrchestrator(object):
     def send_queries_to_dal(self):
         dal = self.connect_to_dal()
         path = self.generate_shared_volume_path()
+        LOG.debug('Generated filepath: {}'.format(path))
         for query in self.query_list:
-            request = dal.create_start_data_movement_request(query=query, sharedVolumePath=path)
+            fname = self.prepare_filename(query)
+            fpath = path + '/' + fname
+            request = dal.create_start_data_movement_request(query=query, sharedVolumePath=fpath)
             dal.send_start_data_movement(request)
 
 

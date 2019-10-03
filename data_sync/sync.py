@@ -1,8 +1,13 @@
 import subprocess
 import os.path
 from shutil import which
+import logging
+import logging.config
 
 from config import conf
+
+logging.config.dictConfig(conf.log_conf)
+LOG = logging.getLogger(__name__)
 
 
 class DataSync:
@@ -28,7 +33,8 @@ class DataSync:
     def finish_data_movement(self, query, path, destination):
         #TODO check circular import problem
         from dal_client.client import DALClient
-
+        LOG.debug('Sync calling finish data movement with args, query: {}, path: {}, dest: {}'.format(query, path,
+                                                                                                      destination))
         dal = DALClient(address=destination, port=conf.dal_default_port, destination=None)
         dal.generate_dal_message_properties()
         request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=path)
@@ -45,10 +51,13 @@ class RsyncData(DataSync):
         self.is_backend_available('rsync')
         self.check_if_source_file_exists(source_path)
         rsync_command = 'rsync -r -a {} {}:{}'.format(source_path, destination_host, destination_path)
+        LOG.debug('Running rsync with rsync command: {}'.format(rsync_command))
         p = subprocess.Popen(rsync_command, shell=True)
         code = p.wait()
         if code == 0:
-            print('Rsync success')
+            LOG.debug('Rsync success, finishing data movement with args query: {}, path: {}, destination: {}'.format(
+                query, destination_path, destination_host
+            ))
             self.finish_data_movement(query=query, path=destination_path, destination=destination_host)
 
 

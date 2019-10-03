@@ -2,6 +2,8 @@ import grpc
 import requests
 import sys
 import json
+import logging
+import logging.config
 
 from service_proto_buffers import dal_pb2_grpc
 import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
@@ -9,6 +11,9 @@ from service_proto_buffers.dal_pb2 import StartDataMovementRequest, FinishDataMo
 
 from data_sync.sync import DataSync
 import config.conf as conf
+
+logging.config.dictConfig(conf.log_conf)
+LOG = logging.getLogger(__name__)
 
 
 class DALClient:
@@ -28,13 +33,13 @@ class DALClient:
         try:
             r = requests.post(conf.keycloak_url, data=conf.keycloak_settings, verify=False)
         except requests.exceptions.RequestException as e:
-            print('Could not connect to keycloak endpoint {}. Exception: {}'.format(conf.keycloak_url, e))
+            LOG.error('Could not connect to keycloak endpoint {}. Exception: {}'.format(conf.keycloak_url, e))
             sys.exit(1)
         try:
             json_resp = json.loads(r.text)
             self.token = json_resp['access_token']
         except KeyError:
-            print('Could not fetch access token needed for DAL comm')
+            LOG.error('Could not fetch access token needed for DAL comm')
             sys.exit(1)
         return self.token
 
@@ -48,9 +53,10 @@ class DALClient:
 
     def process_start_movement_async_response(self, future):
         ds = DataSync()
+        LOG.debug('Start movement callback initiated')
         ds.sync_data(source_path=self.path, destination_host=self.destination, destination_path=self.path,
                      query=self.query)
-        print('Response received: {}'.format(future.result()))
+        LOG.debug('Response received: {}'.format(future.result()))
 
     def create_start_data_movement_request(self, query, sharedVolumePath, sourcePrivacyProperties=None,
                                            destinationPrivacyProperties=None):
@@ -73,6 +79,7 @@ class DALClient:
 
     def send_start_data_movement(self, request, async=True):
         try:
+            LOG.debug('Sending start data movement request: {}, async: {}'.format(request, async))
             if async:
                 call_future = self.stub.startDataMovement.future(request)
                 call_future.add_done_callback(self.process_start_movement_async_response)
