@@ -29,7 +29,7 @@ class DataSync:
         #TODO check circular import problem
         from dal_client.client import DALClient
 
-        dal = DALClient(destination, conf.dal_default_port, None)
+        dal = DALClient(address=destination, port=conf.dal_default_port, destination=None)
         dal.generate_dal_message_properties()
         request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=path)
         dal.send_finish_data_movement(request)

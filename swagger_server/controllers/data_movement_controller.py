@@ -5,6 +5,8 @@ from swagger_server.models.req_body import ReqBody  # noqa: E501
 from swagger_server.models.start_dm import StartDM  # noqa: E501
 from swagger_server import util
 
+from movement_enactor.dme_orchestrator import DMOrchestrator
+
 
 def finish_movement():  # noqa: E501
     """finish_movement
@@ -42,9 +44,11 @@ def init_movement(body):  # noqa: E501
                         columns.append(column['column_id'])
                 sql_queries.append('SELECT {} FROM {}'.format(','.join(columns), tb['table_id']))
 
-    print(body.movements_enaction[0], body.movements_enaction[0]['to'])
+    dmo = DMOrchestrator(source=body.movements_enaction[0]['from'], destination=body.movements_enaction[0]['to'],
+                         query_list=sql_queries)
+    dmo.send_queries_to_dal()
 
-    return 'do some magic!'
+    return 'Initialized data movement', 200
 
 
 def start_movement(body):  # noqa: E501
