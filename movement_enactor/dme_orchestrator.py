@@ -2,13 +2,11 @@ import uuid
 import re
 import os
 import logging
-import logging.config
 
 from dal_client.client import DALClient
 from config import conf
 
-logging.config.dictConfig(conf.log_conf)
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 
 class DMOrchestrator(object):
@@ -33,6 +31,7 @@ class DMOrchestrator(object):
 
     def connect_to_dal(self):
         dal = DALClient(address=self.source, port=conf.dal_default_port, destination=self.destination)
+        LOG.debug('Connected to DAL at: {}'.format(self.source))
         dal.generate_dal_message_properties()
         return dal
 

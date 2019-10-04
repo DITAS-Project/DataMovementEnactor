@@ -3,7 +3,6 @@ import requests
 import sys
 import json
 import logging
-import logging.config
 
 from service_proto_buffers import dal_pb2_grpc
 import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
@@ -12,8 +11,7 @@ from service_proto_buffers.dal_pb2 import StartDataMovementRequest, FinishDataMo
 from data_sync.sync import DataSync
 import config.conf as conf
 
-logging.config.dictConfig(conf.log_conf)
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 
 class DALClient:

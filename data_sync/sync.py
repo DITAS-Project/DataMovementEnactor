@@ -2,12 +2,10 @@ import subprocess
 import os.path
 from shutil import which
 import logging
-import logging.config
 
 from config import conf
 
-logging.config.dictConfig(conf.log_conf)
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 
 class DataSync:
