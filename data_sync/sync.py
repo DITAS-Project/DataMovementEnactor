@@ -18,7 +18,7 @@ class DataSync:
         if which(name) is None:
             raise Exception('{} not installed'.format(name))
 
-    def sync_data(self, source_path, destination_host, destination_path, query):
+    def sync_data(self, source_path, destination_host, destination_path):
         if not conf.sync_backend:
             raise Exception('Sync backend is not defined')
         try:

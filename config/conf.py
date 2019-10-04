@@ -7,7 +7,7 @@ keycloak_settings = {
     'client_id': 'vdc_client',
     'grant_type': 'password'
 }
-shared_volume_system_path = '/home/cloudsigma/movement'
+shared_volume_system_path = '/home/cloudsigma/movement/'
 
 
 # Logging config
