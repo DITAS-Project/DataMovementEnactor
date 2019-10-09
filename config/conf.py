@@ -8,7 +8,7 @@ keycloak_settings = {
     'grant_type': 'password'
 }
 shared_volume_system_path = '/home/cloudsigma/movement/'
-
+dry_run = True
 
 # Logging config
 log_conf = {
@@ -41,3 +41,5 @@ log_conf = {
         },
     }
 }
+
+

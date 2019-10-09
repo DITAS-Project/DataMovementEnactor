@@ -1,6 +1,7 @@
 import subprocess
 import os.path
 from shutil import which
+from pathlib import Path
 import logging
 
 from config import conf
@@ -11,20 +12,23 @@ LOG = logging.getLogger()
 class DataSync:
 
     def check_if_source_file_exists(self, source_path):
-        if not os.path.exists(source_path):
-            raise Exception('Target path does not exist')
+        if conf.dry_run:
+            Path(source_path).touch()
+        elif not os.path.exists(source_path):
+            raise Exception('Target path does not exist: {}'.format(source_path))
 
     def is_backend_available(self, name):
         if which(name) is None:
             raise Exception('{} not installed'.format(name))
 
-    def sync_data(self, source_path, destination_host, destination_path):
+    def sync_data(self, source_path, destination_host, destination_path, query):
         if not conf.sync_backend:
             raise Exception('Sync backend is not defined')
         try:
             cls = sync_backends[conf.sync_backend]
             sync_method = getattr(cls(), 'sync_data')
-            sync_method(source_path=source_path, destination_host=destination_host, destination_path=destination_path)
+            sync_method(source_path=source_path, destination_host=destination_host, destination_path=destination_path,
+                        query=query)
         except KeyError:
             raise Exception('Incorrect sync backend')
 
