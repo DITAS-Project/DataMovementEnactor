@@ -49,10 +49,14 @@ class DataSync:
 
 class RsyncData(DataSync):
 
+    def prepare_destination_path(self, path):
+        return os.path.dirname(path)
+
     def sync_data(self, source_path, destination_host, destination_path, query):
         self.is_backend_available('rsync')
         self.check_if_source_file_exists(source_path)
-        rsync_command = 'rsync -r -a {} {}:{}'.format(source_path, destination_host, destination_path)
+        destination_path = self.prepare_destination_path(destination_path)
+        rsync_command = 'rsync -a {} {}:{}'.format(source_path, destination_host, destination_path)
         LOG.debug('Running rsync with rsync command: {}'.format(rsync_command))
         p = subprocess.Popen(rsync_command, shell=True)
         code = p.wait()

@@ -25,7 +25,7 @@
    ],
    "movementsEnaction":[{
       "from":"178.22.71.88",
-      "to":"ubuntu@shibboleth.zrh.cloudsigma.com",
+      "to":"cloudsigma@shibboleth.zrh.cloudsigma.com",
       "transformations": "empty",
       "type":"DataDuplication"
    }]
