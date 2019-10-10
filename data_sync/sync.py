@@ -50,7 +50,7 @@ class DataSync:
 class RsyncData(DataSync):
 
     def prepare_destination_path(self, path):
-        return os.path.dirname(path)
+        return os.path.dirname(path) + '/'
 
     def sync_data(self, source_path, destination_host, destination_path, query):
         self.is_backend_available('rsync')
