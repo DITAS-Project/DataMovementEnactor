@@ -41,6 +41,7 @@ def init_movement(body):  # noqa: E501
         body = ReqBody.from_dict(connexion.request.get_json())  # noqa: E501
 
     sql_queries = []
+    tables = []
     for d in body.data_sources:
         for db in d.database:
             for tb in db['tables']:
@@ -51,13 +52,14 @@ def init_movement(body):  # noqa: E501
                     for column in tb['columns']:
                         columns.append(column['column_id'])
                 sql_queries.append('SELECT {} FROM {}'.format(','.join(columns), tb['table_id']))
-
+                tables.append(tb['table_id'])
     dmo = DMOrchestrator(source=body.movements_enaction[0]['from'], destination=body.movements_enaction[0]['to'],
                          query_list=sql_queries)
     LOG.debug('Sending queries to the DAL. Source: {}. destination: {}, queries: {}'.format(
         body.movements_enaction[0]['from'], body.movements_enaction[0]['to'], sql_queries))
     dmo.send_queries_to_dal()
-
+    LOG.debug('Adding tables: {} to DME monitor'.format(tables))
+    #TODO add these to redis
     return 'Initialized data movement', 200
 
 

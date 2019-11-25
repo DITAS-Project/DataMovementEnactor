@@ -8,7 +8,6 @@ from service_proto_buffers import dal_pb2_grpc
 import service_proto_buffers.DalMessageProperties_pb2 as DalMessageProperties__pb2
 from service_proto_buffers.dal_pb2 import StartDataMovementRequest, FinishDataMovementRequest
 
-from data_sync.sync import DataSync
 import config.conf as conf
 
 LOG = logging.getLogger()
@@ -16,10 +15,9 @@ LOG = logging.getLogger()
 
 class DALClient:
 
-    def __init__(self, address, port, destination):
+    def __init__(self, address, port):
         self.address = address
         self.port = port
-        self.destination = destination
         self.dal_msg_properties = None
         self.path = None
         self.token = None
@@ -28,6 +26,7 @@ class DALClient:
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
 
     def generate_access_token(self):
+        #TODO implement refresh token
         try:
             r = requests.post(conf.keycloak_url, data=conf.keycloak_settings, verify=False)
         except requests.exceptions.RequestException as e:
@@ -50,10 +49,8 @@ class DALClient:
         return self.dal_msg_properties
 
     def process_start_movement_async_response(self, future):
-        ds = DataSync()
         LOG.debug('Start movement callback initiated')
-        ds.sync_data(source_path=self.path, destination_host=self.destination, destination_path=self.path,
-                     query=self.query)
+        #finish data movement for query
         LOG.debug('Response received: {}'.format(future.result()))
 
     def create_start_data_movement_request(self, query, sharedVolumePath, sourcePrivacyProperties=None,
