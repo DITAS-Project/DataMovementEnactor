@@ -1,34 +1,18 @@
 import time
 import MySQLdb
-import redis
+from movement_enactor.dme_orchestrator import DMContOrchestrator
+from clients.redis_client import RedisClient
+from config import conf
 
 
-class DMEbase:
-
-    def __init__(self, cache_host, cache_port, dal_object):
-        self.cache_host = cache_host
-        self.cache_port = cache_port
-        self.dal = dal_object
-
-    def connect_to_redis(self):
-        r = redis.StrictRedis(host=self.cache_host, port=self.cache_port, charset="utf-8", decode_responses=True)
-        return r
-
-    def send_start_move_request(self, query, sharedVolumePath, *args):
-        request = self.dal.create_start_data_movement_request(query=query, sharedVolumePath=sharedVolumePath, *args)
-        self.dal.send_start_data_movement(request)
-
-
-class DMEdatabase(DMEbase):
+class DMEdatabase:
 
     def __init__(self, db_user=None, db_pass=None, db_name=None, db_host=None, db_port=None):
-        self.db_user = db_user
-        self.db_pass = db_pass
-        self.db_name = db_name
-        self.db_host = db_host
-        self.db_port = db_port
-        super().__init__()
-
+        self.db_user = db_user if db_user else conf.db_user
+        self.db_pass = db_pass if db_pass else conf.db_pass
+        self.db_name = db_name if db_name else conf.db_name
+        self.db_host = db_host if db_host else conf.db_host
+        self.db_port = db_port if db_port else conf.db_port
 
     def connect_to_mysql_data_source(self):
         try:
@@ -67,6 +51,10 @@ class DMEsymmetricds(DMEdatabase):
         return query
 
     def check_for_updates(self):
+        r = RedisClient()
+        moved_tables = r.get('moved_tables')
+        target_dal = r.get('target_dal')
+
         cursor = self.connect_to_mysql_data_source()
         cursor.execute('show tables')
         tables = cursor.fetchall()
@@ -75,52 +63,49 @@ class DMEsymmetricds(DMEdatabase):
         table_names = []
 
         for table in tables:
-            if not table[0].startswith('sym'):
-                table_names.append(table[0])
-            elif table[0] == 'sym_data':
+            if table[0] == 'sym_data':
                 sym_data_table = True
 
         if not sym_data_table:
             raise Exception('sym_data table not found in database')
+        dmo = DMContOrchestrator(target_dal)
         last_id = 0
+
         while True:
-            cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
-            result = cursor.fetchone()
-            if result[1] in table_names and result[0] != last_id:
-                last_id = result[0]
-                cursor.execute("describe {}".format(result[1]))
-                res = cursor.fetchall()
-                table_cols = []
-                primary_keys = []
+            if moved_tables and target_dal:
+                cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
+                result = cursor.fetchone()
+                if result[1] in table_names and result[0] != last_id:
+                    last_id = result[0]
+                    cursor.execute("describe {}".format(result[1]))
+                    res = cursor.fetchall()
+                    table_cols = []
+                    primary_keys = []
 
-                for r in res:
-                    if r[3] != 'PRI':
-                        table_cols.append(r[0])
-                    else:
-                        table_cols.insert(0, r[0])
-                        primary_keys.append(r[0])
+                    for r in res:
+                        if r[3] != 'PRI':
+                            table_cols.append(r[0])
+                        else:
+                            table_cols.insert(0, r[0])
+                            primary_keys.append(r[0])
 
-                where_cond = None
-                if result[2] == 'U' or result[2] == 'D':
-                    pk_data = result[4].split(',')
-                    if len(pk_data) != len(primary_keys):
-                        raise Exception('pk_data data does not match primary key number')
-                    elif len(pk_data) > 1:
-                        zipped = zip(primary_keys, pk_data)
-                        where_values = []
-                        for i in zipped:
-                            where_values.append('{} = {}'.format(i[0], i[1]))
-                        where_cond = 'AND'.join(x for x in where_values)
-                    elif len(pk_data) == 1:
-                        where_cond = '{} = {}'.format(primary_keys[0], pk_data[0])
+                    where_cond = None
+                    if result[2] == 'U' or result[2] == 'D':
+                        pk_data = result[4].split(',')
+                        if len(pk_data) != len(primary_keys):
+                            raise Exception('pk_data data does not match primary key length')
+                        elif len(pk_data) > 1:
+                            zipped = zip(primary_keys, pk_data)
+                            where_values = []
+                            for i in zipped:
+                                where_values.append('{} = {}'.format(i[0], i[1]))
+                            where_cond = 'AND'.join(x for x in where_values)
+                        elif len(pk_data) == 1:
+                            where_cond = '{} = {}'.format(primary_keys[0], pk_data[0])
 
-                sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
-                                                                    insert_order=table_cols, values=result[3],
-                                                                    where_cond=where_cond)
-                print(sql_query)
+                    sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
+                                                                        insert_order=table_cols, values=result[3],
+                                                                        where_cond=where_cond)
 
-                self.send_start_move_request(query=sql_query, sharedVolumePath='/test')
-
+                    dmo.send_query_to_dal(sql_query)
                 time.sleep(1)
-
-
