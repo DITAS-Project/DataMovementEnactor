@@ -13,7 +13,7 @@ keycloak_settings = {
 }
 shared_ftp_host = '178.22.69.180'
 shared_ftp_user = 'ditas'
-shared_ftp_pass = 'GhQ096%mF4YF'
+shared_ftp_pass = '***'
 shared_volume_system_path = 'move/'
 
 dry_run = True
