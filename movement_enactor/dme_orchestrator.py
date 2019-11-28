@@ -8,6 +8,7 @@ from clients.de_client import DEclient
 from clients.ds4m_client import DS4Mclient
 from data_sync.sync import FTPsync
 from config import conf
+from config.blueprint import Blueprint
 
 LOG = logging.getLogger()
 
@@ -55,7 +56,7 @@ class DMInitOrchestrator(DMBase):
         self.dest_infra_id = dest_infra_id
         self.dal_original_ip = dal_original_ip
         self.database = database
-        self.blueprint = conf.Blueprint(self.dest_vdc_id)
+        self.blueprint = Blueprint(self.dest_vdc_id)
 
     def send_create_call_to_deployment_engine(self, dal_id):
         dec = DEclient(endpoint=conf.de_endpoint)

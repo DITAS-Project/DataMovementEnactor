@@ -16,3 +16,16 @@ class RedisClient:
 
     def get(self, key):
         return self.redis.get(key)
+
+    def lpush(self, key, value):
+        return self.redis.lpush(key, *value)
+
+    def get_list(self, key):
+        l = []
+        if self.redis.llen(key) != 0:
+            for i in range(0, self.redis.llen(key)):
+                element = self.redis.lindex(i)
+                l.append(element)
+            return l
+        else:
+            return None

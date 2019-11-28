@@ -1,8 +1,12 @@
 import time
+import logging
+
 import MySQLdb
 from movement_enactor.dme_orchestrator import DMContOrchestrator
 from clients.redis_client import RedisClient
 from config import conf
+
+LOG = logging.getLogger()
 
 
 class DMEdatabase:
@@ -19,7 +23,7 @@ class DMEdatabase:
             db = MySQLdb.connect(user=self.db_user, passwd=self.db_pass,
                                  db=self.db_name, host=self.db_host, port=self.db_port)
         except MySQLdb.Error as e:
-            raise e
+            LOG.exception('Cannot connect to MySQL data source. Exception: {}'.format(e))
 
         db.autocommit(True)
 
@@ -52,8 +56,6 @@ class DMEsymmetricds(DMEdatabase):
 
     def check_for_updates(self):
         r = RedisClient()
-        moved_tables = r.get('moved_tables')
-        target_dal = r.get('target_dal')
 
         cursor = self.connect_to_mysql_data_source()
         cursor.execute('show tables')
@@ -67,12 +69,15 @@ class DMEsymmetricds(DMEdatabase):
                 sym_data_table = True
 
         if not sym_data_table:
-            raise Exception('sym_data table not found in database')
-        dmo = DMContOrchestrator(target_dal)
+            LOG.exception('sym_data table not found in database. Current tables: {}'.format(tables))
         last_id = 0
 
         while True:
+            moved_tables = r.get_list('moved_tables')
+            target_dal = r.get('target_dal')
+
             if moved_tables and target_dal:
+                dmo = DMContOrchestrator(target_dal)
                 cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
                 result = cursor.fetchone()
                 if result[1] in table_names and result[0] != last_id:
@@ -93,7 +98,7 @@ class DMEsymmetricds(DMEdatabase):
                     if result[2] == 'U' or result[2] == 'D':
                         pk_data = result[4].split(',')
                         if len(pk_data) != len(primary_keys):
-                            raise Exception('pk_data data does not match primary key length')
+                            LOG.exception('pk_data data does not match primary key length')
                         elif len(pk_data) > 1:
                             zipped = zip(primary_keys, pk_data)
                             where_values = []
@@ -106,6 +111,7 @@ class DMEsymmetricds(DMEdatabase):
                     sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
                                                                         insert_order=table_cols, values=result[3],
                                                                         where_cond=where_cond)
+                    LOG.debug('Sending update query: {} to DAL'.format(sql_query))
 
                     dmo.send_query_to_dal(sql_query)
-                time.sleep(1)
+                time.sleep(3)

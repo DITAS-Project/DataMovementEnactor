@@ -1,4 +1,8 @@
-import json
+
+config = dict()
+#with open('/etc/ditas/data_movement_enactor.json') as dme_conf_file:
+#    dme_conf = json.load(dme_conf_file)
+
 
 sync_backend = 'ftp'
 dal_default_port = 50055
@@ -13,11 +17,7 @@ keycloak_settings = {
 }
 shared_ftp_host = '178.22.69.180'
 shared_ftp_user = 'ditas'
-<<<<<<< HEAD
-shared_ftp_pass = ''
-=======
 shared_ftp_pass = '***'
->>>>>>> e261058f708ca81153f30258f54451b538310918
 shared_volume_system_path = 'move/'
 
 dry_run = True
@@ -76,25 +76,5 @@ db_host = ''
 db_port = ''
 db_name = ''
 
-
-class Blueprint:
-
-    def __init__(self, vdc_id):
-        self.file_path = '/var/ditas/vdm/DS4M/blueprints/{}.json'.format(vdc_id)
-
-        with open(self.file_path, 'r') as blueprint_cont:
-            try:
-                self.blueprint = json.load(blueprint_cont)
-            except Exception as e:
-                raise Exception('Could not load JSON content from blueprint file: {}'.format(e))
-
-    def get_blueprint_id(self):
-
-        return self.blueprint['id']
-
-    def get_source_dal_id(self, dal_ip):
-        for id in self.blueprint['INTERNAL_STRUCTURE']['DAL_Images'].items():
-            if id[1]['original_ip'] == dal_ip:
-                return id[0]
 
 

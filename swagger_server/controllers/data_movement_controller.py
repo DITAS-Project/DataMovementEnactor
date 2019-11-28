@@ -10,6 +10,7 @@ from swagger_server import util
 
 from movement_enactor.dme_orchestrator import DMInitOrchestrator
 from config import conf
+from clients.redis_client import RedisClient
 
 
 logging.config.dictConfig(conf.log_conf)
@@ -60,8 +61,9 @@ def init_movement(body):  # noqa: E501
     LOG.debug('Sending queries to the DAL. Source: {}. destination: {}, queries: {}'.format(
         body.movements_enaction[0]['from'], body.movements_enaction[0]['to'], sql_queries))
     dmo.send_queries_to_dal(sql_queries)
-    LOG.debug('Adding tables: {} to DME monitor'.format(tables))
-    #TODO add these to redis
+    LOG.debug('Adding tables: {} to DME monitor cache'.format(tables))
+    r = RedisClient()
+    r.lpush('moved_tables', tables)
     return 'Initialized data movement', 200
 
 
