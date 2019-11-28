@@ -4,7 +4,7 @@ info:
   description: Data Movement Enactor API
   contact:
     email: bogdan.despotov@cloudsigma.com
-  version: 0.0.4
+  version: 0.0.5
 servers:
 - url: http://0.0.0.0:{port}/dme
   variables:
@@ -131,5 +131,9 @@ components:
         transformation:
           type: string
         type:
+          type: string
+        dalid:
+          type: string
+        vdcid:
           type: string
 

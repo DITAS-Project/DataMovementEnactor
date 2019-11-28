@@ -14,7 +14,8 @@ class MovementsEnactionInner(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, _from: str=None, to: str=None, transformation: str=None, type: str=None):  # noqa: E501
+    def __init__(self, _from: str=None, to: str=None, transformation: str=None, type: str=None,
+                 dalid: str=None, vdcid: str=None):  # noqa: E501
         """MovementsEnactionInner - a model defined in Swagger
 
         :param _from: The _from of this MovementsEnactionInner.  # noqa: E501
@@ -30,19 +31,25 @@ class MovementsEnactionInner(Model):
             '_from': str,
             'to': str,
             'transformation': str,
-            'type': str
+            'type': str,
+            'dalid': str,
+            'vdcid': str
         }
 
         self.attribute_map = {
             '_from': 'from',
             'to': 'to',
             'transformation': 'transformation',
-            'type': 'type'
+            'type': 'type',
+            'dalid': 'dalid',
+            'vdcid': 'vdcid'
         }
         self.__from = _from
         self._to = to
         self._transformation = transformation
         self._type = type
+        self._dalid = dalid
+        self._vdcid = vdcid
 
     @classmethod
     def from_dict(cls, dikt) -> 'MovementsEnactionInner':
@@ -138,3 +145,19 @@ class MovementsEnactionInner(Model):
         """
 
         self._type = type
+
+    @property
+    def vdcid(self) -> str:
+        return self._vdcid
+
+    @vdcid.setter
+    def vdcid(self, vdcid: str):
+        self._vdcid = vdcid
+
+    @property
+    def dalid(self) -> str:
+        return self._dalid
+
+    @dalid.setter
+    def dalid(self, dalid: str):
+        self.dalid = dalid

@@ -49,13 +49,12 @@ class DMContOrchestrator(DMBase):
 
 class DMInitOrchestrator(DMBase):
 
-    def __init__(self, source, dest_vdc_id, dest_infra_id, dal_original_ip, query_list, database=None):
+    def __init__(self, source, dest_vdc_id, dest_infra_id, dal_original_ip, database=None):
         self.source = source
         self.dest_vdc_id = dest_vdc_id
         self.dest_infra_id = dest_infra_id
         self.dal_original_ip = dal_original_ip
         self.database = database
-        self.query_list = query_list
         self.blueprint = conf.Blueprint(self.dest_vdc_id)
 
     def send_create_call_to_deployment_engine(self, dal_id):
@@ -69,20 +68,20 @@ class DMInitOrchestrator(DMBase):
         response = ds4m_c.notify_new_dal(dal_ip, self.dal_original_ip)
         return response
 
-    def send_queries_to_dal(self):
+    def send_queries_to_dal(self, query_list):
         path = self.generate_shared_volume_path()
         ftp = FTPsync()
         ftp.create_ftp_structure(path)
         dal = self.connect_to_dal(self.dal_original_ip)
         LOG.debug('Generated filepath: {}'.format(path))
-        for query in self.query_list:
+        for query in query_list:
             fname = self.prepare_filename(query)
             fpath = path + '/' + fname
             request = dal.create_start_data_movement_request(query=query, sharedVolumePath=fpath)
             dal.send_start_data_movement(request)
         dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
         response = self.send_create_call_to_deployment_engine(dal_id)
-        for query in self.query_list:
+        for query in query_list:
             fname = self.prepare_filename(query)
             request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=fname)
             dal.send_finish_data_movement(request)

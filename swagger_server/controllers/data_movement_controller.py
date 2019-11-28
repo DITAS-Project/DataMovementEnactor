@@ -8,7 +8,7 @@ from swagger_server.models.req_body import ReqBody  # noqa: E501
 from swagger_server.models.start_dm import StartDM  # noqa: E501
 from swagger_server import util
 
-from movement_enactor.dme_orchestrator import DMOrchestrator
+from movement_enactor.dme_orchestrator import DMInitOrchestrator
 from config import conf
 
 
@@ -53,11 +53,13 @@ def init_movement(body):  # noqa: E501
                         columns.append(column['column_id'])
                 sql_queries.append('SELECT {} FROM {}'.format(','.join(columns), tb['table_id']))
                 tables.append(tb['table_id'])
-    dmo = DMOrchestrator(source=body.movements_enaction[0]['from'], destination=body.movements_enaction[0]['to'],
-                         query_list=sql_queries)
+    dmo = DMInitOrchestrator(source=body.movements_enaction[0]['from'],
+                             dest_infra_id=body.movements_enaction[0]['to'],
+                             dest_vdc_id=body.movements_enaction[0]['vdcid'],
+                             dal_original_ip=body.movements_enaction[0]['dalid'])
     LOG.debug('Sending queries to the DAL. Source: {}. destination: {}, queries: {}'.format(
         body.movements_enaction[0]['from'], body.movements_enaction[0]['to'], sql_queries))
-    dmo.send_queries_to_dal()
+    dmo.send_queries_to_dal(sql_queries)
     LOG.debug('Adding tables: {} to DME monitor'.format(tables))
     #TODO add these to redis
     return 'Initialized data movement', 200
