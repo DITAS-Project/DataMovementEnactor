@@ -1,7 +1,18 @@
+import os
+import json
+import logging
 
-config = dict()
-#with open('/etc/ditas/data_movement_enactor.json') as dme_conf_file:
-#    dme_conf = json.load(dme_conf_file)
+LOG = logging.getLogger()
+
+
+vdc_shared_config = '/etc/ditas/data_movement_enactor.json'
+
+config = {}
+if os.path.isfile(vdc_shared_config):
+    with open(vdc_shared_config) as dme_conf_file:
+        dme_conf = json.load(dme_conf_file)
+else:
+    dme_conf = dict()
 
 
 sync_backend = 'ftp'
@@ -15,9 +26,9 @@ keycloak_settings = {
     'client_id': 'vdc_client',
     'grant_type': 'refresh_token'
 }
-shared_ftp_host = '178.22.69.180'
-shared_ftp_user = 'ditas'
-shared_ftp_pass = '***'
+shared_ftp_host = dme_conf.get('ftp_host', '178.22.69.180')
+shared_ftp_user = dme_conf.get('ftp_user', 'ditas')
+shared_ftp_pass = dme_conf.get('ftp_pass', '**')
 shared_volume_system_path = 'move/'
 
 dry_run = True
@@ -60,21 +71,21 @@ backoff_factor = 3
 
 #TODO complete endpoint generation
 #DE endpoint
-de_endpoint = ''
+de_endpoint = '{}:50012'.format('localhost')
 
 #DS4M endpoint
-ds4m_endpoint = ''
+ds4m_endpoint = '{}:30003'.format('localhost')
 
 #Redis settings
 redis_host = 'localhost'
 redis_port = 6379
 
 #SymmetricDS db settings
-db_user = ''
-db_pass = ''
-db_host = ''
-db_port = ''
-db_name = ''
+db_user = dme_conf.get('db_user', None)
+db_pass = dme_conf.get('db_pass', None)
+db_host = dme_conf.get('db_host', None)
+db_port = dme_conf.get('db_port', None)
+db_name = dme_conf.get('db_name', None)
 
 
 
