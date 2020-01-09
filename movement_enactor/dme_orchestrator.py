@@ -6,6 +6,7 @@ import logging
 from clients.dal_client import DALClient
 from clients.de_client import DEclient
 from clients.ds4m_client import DS4Mclient
+from clients.redis_client import RedisClient
 from data_sync.sync import FTPsync
 from config import conf
 from config.blueprint import Blueprint
@@ -61,6 +62,7 @@ class DMInitOrchestrator(DMBase):
     def send_create_call_to_deployment_engine(self, dal_id):
         dec = DEclient(endpoint=conf.de_endpoint)
         blueprint_id = self.blueprint.get_blueprint_id()
+        resp = dec.create_datasource(blueprint_id, self.dest_vdc_id, self.dest_infra_id)
         response = dec.create_dal(blueprint_id, self.dest_vdc_id, self.dest_infra_id, dal_id)
         return response
 
@@ -79,6 +81,7 @@ class DMInitOrchestrator(DMBase):
             fname = self.prepare_filename(query)
             fpath = path + '/' + fname
             request = dal.create_start_data_movement_request(query=query, sharedVolumePath=fpath)
+            LOG.debug('Starting data movement for query:'.format(query))
             dal.send_start_data_movement(request)
         dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
         response = self.send_create_call_to_deployment_engine(dal_id)
@@ -86,6 +89,7 @@ class DMInitOrchestrator(DMBase):
             fname = self.prepare_filename(query)
             request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=fname)
             dal.send_finish_data_movement(request)
+        #self.notify_ds4m_for_new_dal()
         #call to DS4M
         #get details from DE response
         #add target_dal_ip to Redis

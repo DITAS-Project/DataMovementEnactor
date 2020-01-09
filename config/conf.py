@@ -26,6 +26,12 @@ keycloak_settings = {
     'client_id': 'vdc_client',
     'grant_type': 'refresh_token'
 }
+#ES config
+elasticsearch_url = dme_conf.get('ElasticSearchURL', None)
+elasticsearch_authenticate = dme_conf.get('elasticsearch_authenticate', False)
+elasticsearch_user = dme_conf.get('elasticsearch_user', None)
+elasticsearch_password = dme_conf.get('elasticsearch_password', None)
+#FTP config
 shared_ftp_host = dme_conf.get('ftp_host', '178.22.69.180')
 shared_ftp_user = dme_conf.get('ftp_user', 'ditas')
 shared_ftp_pass = dme_conf.get('ftp_pass', '**')
@@ -87,5 +93,29 @@ db_host = dme_conf.get('db_host', None)
 db_port = dme_conf.get('db_port', None)
 db_name = dme_conf.get('db_name', None)
 
+#DB update ES config
+db_update_es_index = 'dme-db-updates'
 
+db_udpate_es_settings = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+        },
+    "mappings": {
+        "db_update": {
+            "dynamic": "strict",
+            "properties": {
+                "query": {
+                    "type": "text"
+                    },
+                "timestamp": {
+                    "type": "text"
+                    },
+                "target_dal": {
+                    "type": "text"
+                    }
+                }
+            }
+        }
+    }
 

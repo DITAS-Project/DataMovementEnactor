@@ -1,4 +1,8 @@
 from clients.http_common import GenericClient
+import logging
+
+
+LOG = logging.getLogger()
 
 
 class DEclient(GenericClient):
@@ -8,5 +12,16 @@ class DEclient(GenericClient):
 
         response = self.post(url, data=None)
 
+        LOG.debug('Created DAL. Response: {}'.format(response))
+
         return response
 
+    def create_datasource(self, blueprint_id, vdc_id, infra_id, type):
+        url = self.endpoint + '/blueprint/{}/vdc/{}/{}/datasource?type={}&size=2Gi&id=bloodTest'.format(blueprint_id,
+                                                                                                        vdc_id,
+                                                                                                        infra_id,
+                                                                                                        type)
+        response = self.post(url, data=None)
+        LOG.debug('Created datasource. Response: {}'.format(response))
+
+        return response
