@@ -59,37 +59,46 @@ class DMInitOrchestrator(DMBase):
         self.database = database
         self.blueprint = Blueprint(self.dest_vdc_id)
 
-    def send_create_call_to_deployment_engine(self, dal_id):
+    def create_and_move_dal(self):
         dec = DEclient(endpoint=conf.de_endpoint)
         blueprint_id = self.blueprint.get_blueprint_id()
         resp = dec.create_datasource(blueprint_id, self.dest_vdc_id, self.dest_infra_id)
+        dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
         response = dec.create_dal(blueprint_id, self.dest_vdc_id, self.dest_infra_id, dal_id)
-        return response
+        new_dal_ip = response['Infrastructures'][self.dest_infra_id]['IP']
+        r = RedisClient()
+        r.set('target_dal', new_dal_ip)
+        return new_dal_ip
 
     def notify_ds4m_for_new_dal(self, dal_ip):
         ds4m_c = DS4Mclient(endpoint=conf.ds4m_endpoint)
         response = ds4m_c.notify_new_dal(dal_ip, self.dal_original_ip)
         return response
 
-    def send_queries_to_dal(self, query_list):
+    def send_queries_to_dal(self, query_list, dal_ip):
         path = self.generate_shared_volume_path()
         ftp = FTPsync()
         ftp.create_ftp_structure(path)
-        dal = self.connect_to_dal(self.dal_original_ip)
+        dal = self.connect_to_dal(dal_ip)
         LOG.debug('Generated filepath: {}'.format(path))
+        LOG.debug('Starting data movement for queries: {}'.format(query_list))
         for query in query_list:
             fname = self.prepare_filename(query)
             fpath = path + '/' + fname
             request = dal.create_start_data_movement_request(query=query, sharedVolumePath=fpath)
-            LOG.debug('Starting data movement for query:'.format(query))
             dal.send_start_data_movement(request)
-        dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
-        response = self.send_create_call_to_deployment_engine(dal_id)
+
+    def finish_data_movement_for_queries(self, query_list, dal_ip):
+        dal = self.connect_to_dal(dal_ip)
+        LOG.debug('Finishing data movement for queries: {}'.format(query_list))
         for query in query_list:
             fname = self.prepare_filename(query)
             request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=fname)
             dal.send_finish_data_movement(request)
-        #self.notify_ds4m_for_new_dal()
-        #call to DS4M
-        #get details from DE response
-        #add target_dal_ip to Redis
+
+    def initial_movement(self, query_list, dal_ip):
+        self.send_queries_to_dal(query_list, dal_ip)
+        self.finish_data_movement_for_queries(query_list, dal_ip)
+        new_dal_ip = self.create_and_move_dal()
+        self.notify_ds4m_for_new_dal(new_dal_ip)
+

@@ -96,7 +96,7 @@ db_name = dme_conf.get('db_name', None)
 #DB update ES config
 db_update_es_index = 'dme-db-updates'
 
-db_udpate_es_settings = {
+db_update_es_settings = {
     "settings": {
         "number_of_shards": 1,
         "number_of_replicas": 0
@@ -108,12 +108,12 @@ db_udpate_es_settings = {
                 "query": {
                     "type": "text"
                     },
-                "timestamp": {
-                    "type": "text"
-                    },
                 "target_dal": {
                     "type": "text"
-                    }
+                    },
+                "timestamp": {
+                    "type": "date"
+                }
                 }
             }
         }

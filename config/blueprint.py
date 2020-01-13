@@ -17,7 +17,7 @@ class Blueprint:
 
     def get_blueprint_id(self):
 
-        return self.blueprint['id']
+        return self.blueprint['_id']
 
     def get_source_dal_id(self, dal_ip):
         for id in self.blueprint['INTERNAL_STRUCTURE']['DAL_Images'].items():

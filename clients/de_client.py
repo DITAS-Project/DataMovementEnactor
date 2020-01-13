@@ -25,3 +25,10 @@ class DEclient(GenericClient):
         LOG.debug('Created datasource. Response: {}'.format(response))
 
         return response
+
+    def move_dal(self, blueprint_id, vdc_id, infra_id, dal_id, dal_ip):
+        url = self.endpoint + '/blueprint/{}/vdc/{}/{}/dal/{}?ip={}'.format(blueprint_id, vdc_id, infra_id, dal_id,
+                                                                            dal_ip)
+        response = self.put(url, data=None)
+        LOG.debug('Moved DAL. Response: {}'.format(response))
+        return response

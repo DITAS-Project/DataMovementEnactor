@@ -1,9 +1,11 @@
 import time
+import datetime
 import logging
 
 import MySQLdb
 from movement_enactor.dme_orchestrator import DMContOrchestrator
 from clients.redis_client import RedisClient
+from clients.es_client import ElasticClient
 from config import conf
 
 LOG = logging.getLogger()
@@ -17,6 +19,7 @@ class DMEdatabase:
         self.db_name = db_name if db_name else conf.db_name
         self.db_host = db_host if db_host else conf.db_host
         self.db_port = db_port if db_port else conf.db_port
+        self.es = ElasticClient()
 
     def connect_to_mysql_data_source(self):
         try:
@@ -53,6 +56,14 @@ class DMEsymmetricds(DMEdatabase):
             query = type_map['D'].format(table_name=table_name, where_cond=where_cond)
 
         return query
+
+    def add_query_to_elasitcsearch(self, query, target_dal):
+        body = {
+            "query": query,
+            "target_dal": target_dal,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        self.es.write_db_updates_to_index(body=body)
 
     def check_for_updates(self):
         r = RedisClient()
