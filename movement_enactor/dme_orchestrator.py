@@ -58,14 +58,14 @@ class DMInitOrchestrator(DMBase):
         self.dal_original_ip = dal_original_ip
         self.database = database
         self.blueprint = Blueprint(self.dest_vdc_id)
+        self.blueprint_id = self.blueprint.get_concrete_blueprint_id()
+        self.dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
+        self.dec = DEclient(endpoint=conf.de_endpoint)
 
-    def create_and_move_dal(self):
-        dec = DEclient(endpoint=conf.de_endpoint)
-        blueprint_id = self.blueprint.get_blueprint_id()
-        resp = dec.create_datasource(blueprint_id, self.dest_vdc_id, self.dest_infra_id)
-        dal_id = self.blueprint.get_source_dal_id(self.dal_original_ip)
-        response = dec.create_dal(blueprint_id, self.dest_vdc_id, self.dest_infra_id, dal_id)
-        new_dal_ip = response['Infrastructures'][self.dest_infra_id]['IP']
+    def create_target_dal(self):
+        resp = self.dec.create_datasource(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, type='minio')
+        response = self.dec.create_dal(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, self.dal_id)
+        new_dal_ip = response.text['Infrastructures'][self.dest_infra_id]['IP']
         r = RedisClient()
         r.set('target_dal', new_dal_ip)
         return new_dal_ip
@@ -98,7 +98,8 @@ class DMInitOrchestrator(DMBase):
 
     def initial_movement(self, query_list, dal_ip):
         self.send_queries_to_dal(query_list, dal_ip)
-        self.finish_data_movement_for_queries(query_list, dal_ip)
-        new_dal_ip = self.create_and_move_dal()
+        new_dal_ip = self.create_target_dal()
+        self.finish_data_movement_for_queries(query_list, new_dal_ip)
+        self.dec.move_dal(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, self.dal_id, new_dal_ip)
         self.notify_ds4m_for_new_dal(new_dal_ip)
 

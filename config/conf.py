@@ -77,10 +77,10 @@ backoff_factor = 3
 
 #TODO complete endpoint generation
 #DE endpoint
-de_endpoint = '{}:50012'.format('localhost')
+de_endpoint = 'http://{}:50012'.format('localhost')
 
 #DS4M endpoint
-ds4m_endpoint = '{}:30003'.format('localhost')
+ds4m_endpoint = 'http://{}:30003'.format('localhost')
 
 #Redis settings
 redis_host = 'localhost'
