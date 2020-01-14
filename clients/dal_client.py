@@ -26,7 +26,6 @@ class DALClient:
         self.stub = dal_pb2_grpc.DataMovementServiceStub(self.channel)
 
     def generate_access_token(self):
-        #TODO implement refresh token
         try:
             r = requests.post(conf.keycloak_url, data=conf.keycloak_settings, verify=False)
         except requests.exceptions.RequestException as e:

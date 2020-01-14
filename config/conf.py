@@ -17,12 +17,10 @@ else:
 
 sync_backend = 'ftp'
 dal_default_port = 50055
-keycloak_url = 'https://153.92.30.56:58080/auth/realms/288/protocol/openid-connect/token'
-#TODO implement refresh token
+keycloak_url = 'https://153.92.30.225:58080/auth/realms/vdc_access/protocol/openid-connect/token'
 keycloak_settings = {
     'username': 'bogdan',
-    'password': '',
-    'refresh_token': '',
+    'refresh_token': 'eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIxNThjN2IxNi1mOWY0LTQ3NTUtYjEwZC0zMmFkY2ViNjE5MjQifQ.eyJqdGkiOiI3MTM0MTk1Zi01ODU3LTRiMzYtODRkNS0xYTgxN2QwMzhjODUiLCJleHAiOjE1NzkwNDk1NzIsIm5iZiI6MCwiaWF0IjoxNTc5MDE1NzkwLCJpc3MiOiJodHRwczovLzE1My45Mi4zMC4yMjU6NTgwODAvYXV0aC9yZWFsbXMvdmRjX2FjY2VzcyIsImF1ZCI6Imh0dHBzOi8vMTUzLjkyLjMwLjIyNTo1ODA4MC9hdXRoL3JlYWxtcy92ZGNfYWNjZXNzIiwic3ViIjoiN2NkNzY2MWMtYThlOC00OWZhLTgyNjEtNjVmOGIwY2EzYjdiIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6InZkY19jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIxYjQ1N2UwMS0wN2ExLTRiNDUtOThjMy01OGE0YWU0YTYwMjgiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZG9jdG9yIiwiZXh0ZXJuYWwtcmVzZWFyY2hlciIsInJlc2VhcmNoZXIiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIn0.8uOhK6Bnb7ivBU9Yqq2Ghac1weltFRyQCggq_CQ3QFQ',
     'client_id': 'vdc_client',
     'grant_type': 'refresh_token'
 }
