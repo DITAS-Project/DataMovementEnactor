@@ -24,7 +24,7 @@ class RedisClient:
         l = []
         if self.redis.llen(key) != 0:
             for i in range(0, self.redis.llen(key)):
-                element = self.redis.lindex(i)
+                element = self.redis.lindex(key, i)
                 l.append(element)
             return l
         else:

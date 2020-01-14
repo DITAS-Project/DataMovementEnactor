@@ -85,11 +85,11 @@ redis_host = 'localhost'
 redis_port = 6379
 
 #SymmetricDS db settings
-db_user = dme_conf.get('db_user', None)
+db_user = dme_conf.get('db_user', 'ditas')
 db_pass = dme_conf.get('db_pass', None)
-db_host = dme_conf.get('db_host', None)
-db_port = dme_conf.get('db_port', None)
-db_name = dme_conf.get('db_name', None)
+db_host = dme_conf.get('db_host', '104.36.16.223')
+db_port = dme_conf.get('db_port', 3306)
+db_name = dme_conf.get('db_name', 'ditas_dummy_example')
 
 #DB update ES config
 db_update_es_index = 'dme-db-updates'
