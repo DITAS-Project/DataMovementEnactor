@@ -123,7 +123,9 @@ class DMEsymmetricds(DMEdatabase):
                                                                     where_cond=where_cond)
                 if moved_tables and target_dal:
                     LOG.debug('Sending update query: {} to DAL'.format(sql_query))
-                    dmo.send_query_to_dal(sql_query)
-
+                    try:
+                        dmo.send_query_to_dal(sql_query)
+                    except Exception as e:
+                        LOG.exception('Could not send continuous movement queries to DAL. Error: {}'.format(e))
                 self.add_query_to_elasitcsearch(sql_query, target_dal)
                 time.sleep(5)

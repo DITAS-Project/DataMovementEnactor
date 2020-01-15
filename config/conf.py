@@ -16,7 +16,7 @@ else:
 
 
 sync_backend = 'ftp'
-dal_default_port = 50055
+dal_default_port = dme_conf.get('Port', 50055)
 keycloak_url = 'https://153.92.30.225:58080/auth/realms/vdc_access/protocol/openid-connect/token'
 keycloak_settings = {
     'username': 'bogdan',
@@ -73,7 +73,6 @@ log_conf = {
 max_retries = 3
 backoff_factor = 3
 
-#TODO complete endpoint generation
 #DE endpoint
 de_endpoint = 'http://{}:50012'.format('localhost')
 

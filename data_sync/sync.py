@@ -37,18 +37,13 @@ class DataSync:
         return os.path.dirname(path) + '/'
 
     def finish_data_movement(self, query, path, destination):
-        #TODO check circular import problem
         from clients.dal_client import DALClient
         LOG.debug('Sync calling finish data movement with args, query: {}, path: {}, dest: {}'.format(query, path,
                                                                                                       destination))
-        dal = DALClient(address=destination, port=conf.dal_default_port, destination=None)
+        dal = DALClient(address=destination, port=conf.dal_default_port)
         dal.generate_dal_message_properties()
         request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=path)
         dal.send_finish_data_movement(request)
-
-    def send_details_to_ds4m(self):
-        #TODO contact DS4M with the destination where the data has moved
-        pass
 
 
 class RsyncData(DataSync):
