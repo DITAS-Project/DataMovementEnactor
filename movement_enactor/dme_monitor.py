@@ -56,6 +56,9 @@ class DMEsymmetricds(DMEdatabase):
 
         return query
 
+    def compile_select_query_for_dal(self, primary_key, primary_key_value, table_name):
+        return 'SELECT * FROM {} WHERE {} = {}'.format(table_name, primary_key, primary_key_value)
+
     def add_query_to_elasitcsearch(self, query, target_dal):
         body = {
             "query": query,
@@ -65,7 +68,6 @@ class DMEsymmetricds(DMEdatabase):
         self.es.write_db_updates_to_index(body=body)
 
     def check_for_updates(self):
-        r = RedisClient()
 
         cursor = self.connect_to_mysql_data_source()
         cursor.execute('show tables')
@@ -84,8 +86,10 @@ class DMEsymmetricds(DMEdatabase):
         last_id = 0
 
         while True:
+            r = RedisClient()
             moved_tables = r.get_list('moved_tables')
             target_dal = r.get('target_dal')
+            original_dal = r.get('original_dal')
 
             dmo = DMContOrchestrator(target_dal)
             cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
@@ -121,11 +125,17 @@ class DMEsymmetricds(DMEdatabase):
                 sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
                                                                     insert_order=table_cols, values=result[3],
                                                                     where_cond=where_cond)
-                if moved_tables and target_dal:
-                    LOG.debug('Sending update query: {} to DAL'.format(sql_query))
-                    try:
-                        dmo.send_query_to_dal(sql_query)
-                    except Exception as e:
-                        LOG.exception('Could not send continuous movement queries to DAL. Error: {}'.format(e))
+
+                if result[2] == 'I':
+                    select_sql_query = self.compile_select_query_for_dal(primary_key=table_cols[0],
+                                                                         primary_key_value=result[3].split('"')[1],
+                                                                         table_name=result[1])
+
+                    if moved_tables and target_dal and original_dal:
+                        LOG.debug('Sending select query: {} to DAL'.format(select_sql_query))
+                        try:
+                            dmo.send_query_to_dal(select_sql_query)
+                        except Exception as e:
+                            LOG.exception('Could not send continuous movement queries to DAL. Error: {}'.format(e))
                 self.add_query_to_elasitcsearch(sql_query, target_dal)
                 time.sleep(5)

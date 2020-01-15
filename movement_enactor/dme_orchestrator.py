@@ -68,6 +68,7 @@ class DMInitOrchestrator(DMBase):
         new_dal_ip = response.text['Infrastructures'][self.dest_infra_id]['IP']
         r = RedisClient()
         r.set('target_dal', new_dal_ip)
+        r.set('original_dal', self.dal_original_ip)
         return new_dal_ip
 
     def notify_ds4m_for_new_dal(self, dal_ip):
