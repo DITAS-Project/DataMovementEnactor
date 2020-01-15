@@ -25,12 +25,11 @@ class DMEdatabase:
         try:
             db = MySQLdb.connect(user=self.db_user, passwd=self.db_pass,
                                  db=self.db_name, host=self.db_host, port=self.db_port)
+            db.autocommit(True)
+
+            return db.cursor()
         except MySQLdb.Error as e:
             LOG.exception('Cannot connect to MySQL data source. Exception: {}'.format(e))
-
-        db.autocommit(True)
-
-        return db.cursor()
 
 
 class DMEsymmetricds(DMEdatabase):
@@ -87,42 +86,43 @@ class DMEsymmetricds(DMEdatabase):
             moved_tables = r.get_list('moved_tables')
             target_dal = r.get('target_dal')
 
-            if moved_tables and target_dal:
-                dmo = DMContOrchestrator(target_dal)
-                cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
-                result = cursor.fetchone()
-                if result[1] in table_names and result[0] != last_id:
-                    last_id = result[0]
-                    cursor.execute("describe {}".format(result[1]))
-                    res = cursor.fetchall()
-                    table_cols = []
-                    primary_keys = []
+            dmo = DMContOrchestrator(target_dal)
+            cursor.execute("SELECT * FROM sym_data WHERE data_id = (SELECT MAX(data_id) FROM sym_data)")
+            result = cursor.fetchone()
+            if result[1] in table_names and result[0] != last_id:
+                last_id = result[0]
+                cursor.execute("describe {}".format(result[1]))
+                res = cursor.fetchall()
+                table_cols = []
+                primary_keys = []
 
-                    for r in res:
-                        if r[3] != 'PRI':
-                            table_cols.append(r[0])
-                        else:
-                            table_cols.insert(0, r[0])
-                            primary_keys.append(r[0])
+                for r in res:
+                    if r[3] != 'PRI':
+                        table_cols.append(r[0])
+                    else:
+                        table_cols.insert(0, r[0])
+                        primary_keys.append(r[0])
 
-                    where_cond = None
-                    if result[2] == 'U' or result[2] == 'D':
-                        pk_data = result[4].split(',')
-                        if len(pk_data) != len(primary_keys):
-                            LOG.exception('pk_data data does not match primary key length')
-                        elif len(pk_data) > 1:
-                            zipped = zip(primary_keys, pk_data)
-                            where_values = []
-                            for i in zipped:
-                                where_values.append('{} = {}'.format(i[0], i[1]))
-                            where_cond = 'AND'.join(x for x in where_values)
-                        elif len(pk_data) == 1:
-                            where_cond = '{} = {}'.format(primary_keys[0], pk_data[0])
+                where_cond = None
+                if result[2] == 'U' or result[2] == 'D':
+                    pk_data = result[4].split(',')
+                    if len(pk_data) != len(primary_keys):
+                        LOG.exception('pk_data data does not match primary key length')
+                    elif len(pk_data) > 1:
+                        zipped = zip(primary_keys, pk_data)
+                        where_values = []
+                        for i in zipped:
+                            where_values.append('{} = {}'.format(i[0], i[1]))
+                        where_cond = 'AND'.join(x for x in where_values)
+                    elif len(pk_data) == 1:
+                        where_cond = '{} = {}'.format(primary_keys[0], pk_data[0])
 
-                    sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
-                                                                        insert_order=table_cols, values=result[3],
-                                                                        where_cond=where_cond)
+                sql_query = self.compile_sql_query_from_symmetricds(operation=result[2], table_name=result[1],
+                                                                    insert_order=table_cols, values=result[3],
+                                                                    where_cond=where_cond)
+                if moved_tables and target_dal:
                     LOG.debug('Sending update query: {} to DAL'.format(sql_query))
-
                     dmo.send_query_to_dal(sql_query)
-                time.sleep(3)
+               
+                self.add_query_to_elasitcsearch(sql_query, target_dal)
+                time.sleep(5)
