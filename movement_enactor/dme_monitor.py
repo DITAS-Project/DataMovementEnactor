@@ -71,15 +71,16 @@ class DMEsymmetricds(DMEdatabase):
         cursor.execute('show tables')
         tables = cursor.fetchall()
 
-        sym_data_table = False
         table_names = []
 
         for table in tables:
+            if not table[0].startswith('sym_'):
+                table_names.append(table[0])
             if table[0] == 'sym_data':
-                sym_data_table = True
+                table_names.append('sym_data')
 
-        if not sym_data_table:
-            LOG.exception('sym_data table not found in database. Current tables: {}'.format(tables))
+        if 'sym_data' not in table_names:
+            LOG.exception('sym_data table not found in database. Current tables in DB: {}'.format(tables))
         last_id = 0
 
         while True:
@@ -123,6 +124,6 @@ class DMEsymmetricds(DMEdatabase):
                 if moved_tables and target_dal:
                     LOG.debug('Sending update query: {} to DAL'.format(sql_query))
                     dmo.send_query_to_dal(sql_query)
-               
+
                 self.add_query_to_elasitcsearch(sql_query, target_dal)
                 time.sleep(5)
