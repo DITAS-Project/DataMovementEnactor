@@ -54,13 +54,14 @@ def init_movement(body):  # noqa: E501
                         columns.append(column['column_id'])
                 sql_queries.append('SELECT {} FROM {}'.format(','.join(columns), tb['table_id']))
                 tables.append(tb['table_id'])
+
     dmo = DMInitOrchestrator(source=body.movements_enaction[0]['from'],
                              dest_infra_id=body.movements_enaction[0]['to'],
                              dest_vdc_id=body.movements_enaction[0]['vdcid'],
                              dal_original_ip=body.movements_enaction[0]['dalid'])
     LOG.debug('Sending queries to the DAL. Source: {}. destination: {}, queries: {}'.format(
         body.movements_enaction[0]['from'], body.movements_enaction[0]['to'], sql_queries))
-    dmo.send_queries_to_dal(sql_queries)
+    dmo.initial_movement(sql_queries)
     LOG.debug('Adding tables: {} to DME monitor cache'.format(tables))
     r = RedisClient()
     r.lpush('moved_tables', tables)

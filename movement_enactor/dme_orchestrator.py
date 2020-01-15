@@ -23,6 +23,7 @@ class DMBase:
             os.makedirs(path)
         return path
 
+    @staticmethod
     def prepare_filename(self, query):
         stripped_query = re.sub(r'\W+', '', query)
         filename = stripped_query + '.parquet'
@@ -97,10 +98,9 @@ class DMInitOrchestrator(DMBase):
             request = dal.create_finish_data_movement_request(query=query, sharedVolumePath=fname)
             dal.send_finish_data_movement(request)
 
-    def initial_movement(self, query_list, dal_ip):
-        self.send_queries_to_dal(query_list, dal_ip)
+    def initial_movement(self, query_list):
+        self.send_queries_to_dal(query_list, self.dal_original_ip)
         new_dal_ip = self.create_target_dal()
-        self.finish_data_movement_for_queries(query_list, new_dal_ip)
         self.dec.move_dal(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, self.dal_id, new_dal_ip)
         self.notify_ds4m_for_new_dal(new_dal_ip)
 
