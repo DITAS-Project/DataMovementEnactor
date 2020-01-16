@@ -16,19 +16,19 @@ class Blueprint:
                 except Exception as e:
                     LOG.exception('Could not load JSON content from concrete blueprint file: {}'.format(e))
 
-        self.abstract_blueprint_file_path = '/var/ditas/blueprint.json'
+       # self.abstract_blueprint_file_path = '/var/ditas/blueprint.json'
 
-        with open(self.abstract_blueprint_file_path, 'r') as abs_blueprint_cont:
-                try:
-                    self.abs_blueprint = json.load(abs_blueprint_cont)
-                except Exception as e:
-                    LOG.exception('Could not load JSON content from abstract blueprint file: {}'.format(e))
+       # with open(self.abstract_blueprint_file_path, 'r') as abs_blueprint_cont:
+       #         try:
+       #             self.abs_blueprint = json.load(abs_blueprint_cont)
+       #         except Exception as e:
+       #             LOG.exception('Could not load JSON content from abstract blueprint file: {}'.format(e))
 
     def get_concrete_blueprint_id(self):
 
         return self.blueprint['_id']
 
     def get_source_dal_id(self, dal_ip):
-        for id in self.abs_blueprint['INTERNAL_STRUCTURE']['DAL_Images'].items():
+        for id in self.blueprint['INTERNAL_STRUCTURE']['DAL_Images'].items():
             if id[1]['original_ip'] == dal_ip:
                 return id[0]
