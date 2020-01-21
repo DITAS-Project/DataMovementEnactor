@@ -2,6 +2,7 @@ import uuid
 import re
 import os
 import logging
+import json
 
 from clients.dal_client import DALClient
 from clients.de_client import DEclient
@@ -16,6 +17,7 @@ LOG = logging.getLogger()
 
 class DMBase:
 
+    @staticmethod
     def generate_shared_volume_path(self, ftp=True):
         directory_name = uuid.uuid4().hex
         path = conf.shared_volume_system_path + directory_name
@@ -66,7 +68,8 @@ class DMInitOrchestrator(DMBase):
     def create_target_dal(self):
         resp = self.dec.create_datasource(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, type='minio')
         response = self.dec.create_dal(self.blueprint_id, self.dest_vdc_id, self.dest_infra_id, self.dal_id)
-        new_dal_ip = response.text['Infrastructures'][self.dest_infra_id]['IP']
+        response_json = json.loads(response.text)
+        new_dal_ip = response_json['Infrastructures'][self.dest_infra_id]['IP']
         r = RedisClient()
         r.set('target_dal', new_dal_ip)
         r.set('original_dal', self.dal_original_ip)
