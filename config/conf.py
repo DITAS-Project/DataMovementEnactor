@@ -81,7 +81,7 @@ ds4m_endpoint = 'http://{}:30003'.format('localhost')
 
 #Redis settings
 redis_host = 'localhost'
-redis_port = 6379
+redis_port = 30031
 
 #SymmetricDS db settings
 db_user = dme_conf.get('db_user', 'ditas')
