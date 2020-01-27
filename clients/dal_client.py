@@ -38,7 +38,8 @@ class DALClient:
             LOG.error('Could not fetch access token needed for DAL comm')
         return self.token
 
-    def generate_dal_message_properties(self, purpose='read', requesterId='requester', authorization='Bearer'):
+    def generate_dal_message_properties(self, purpose='data_movement_public_cloud', requesterId='requester',
+                                        authorization='Bearer'):
         self.generate_access_token()
         authorization = authorization + " " + self.token
         self.dal_msg_properties = DalMessageProperties__pb2.DalMessageProperties(purpose=purpose,

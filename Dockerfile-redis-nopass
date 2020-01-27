@@ -1,9 +1,5 @@
-FROM ubuntu:18.04
-
-RUN apt-get update && \
-    apt-get install -y redis-server && \
-    apt-get clean
+FROM redis
 
 EXPOSE 30031
 
-CMD ["redis-server", "--protected-mode no"]
+CMD ["redis-server", "--protected-mode no", "--port 30031"]

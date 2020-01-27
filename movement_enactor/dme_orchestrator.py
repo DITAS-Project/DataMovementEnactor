@@ -17,7 +17,6 @@ LOG = logging.getLogger()
 
 class DMBase:
 
-    @staticmethod
     def generate_shared_volume_path(self, ftp=True):
         directory_name = uuid.uuid4().hex
         path = conf.shared_volume_system_path + directory_name
@@ -25,7 +24,6 @@ class DMBase:
             os.makedirs(path)
         return path
 
-    @staticmethod
     def prepare_filename(self, query):
         stripped_query = re.sub(r'\W+', '', query)
         filename = stripped_query + '.parquet'

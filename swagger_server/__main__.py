@@ -5,7 +5,7 @@ import connexion
 
 from swagger_server import encoder
 from movement_enactor.dme_monitor import DMEsymmetricds
-from config.conf import config
+from config import conf
 from clients.redis_client import RedisClient
 
 
@@ -14,7 +14,10 @@ def main():
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('swagger.yaml', arguments={'title': 'Data Movement Enactor'}, pythonic_params=True)
-    port = config.get('port', 30030)
+    if conf.port:
+        port = conf.port
+    else:
+        port = 30030
     r = RedisClient()
     # ensure this is empty at start
     r.redis.delete('moved_tables')

@@ -14,9 +14,9 @@ if os.path.isfile(vdc_shared_config):
 else:
     dme_conf = dict()
 
-
+port = dme_conf.get('Port', None)
 sync_backend = 'ftp'
-dal_default_port = dme_conf.get('Port', 30055)
+dal_default_port = 30055
 keycloak_url = 'https://153.92.30.225:58080/auth/realms/vdc_access/protocol/openid-connect/token'
 keycloak_settings = {
     'username': 'bogdan',
