@@ -26,7 +26,7 @@ class DMBase:
 
     def prepare_filename(self, query):
         stripped_query = re.sub(r'\W+', '', query)
-        filename = stripped_query + '.parquet'
+        filename = stripped_query + '.parquet.encrypted'
         return filename
 
     def connect_to_dal(self, dal_ip):
