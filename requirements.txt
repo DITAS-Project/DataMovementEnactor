@@ -4,7 +4,7 @@ setuptools >= 21.0.0
 redis==3.3.6
 elasticsearch==7.1.0
 requests==2.22.0
-mysqlclient==1.4.2.post1
+mysqlclient==1.4.3
 grpc-api-client==0.1.1
 grpcio==1.22.0
 grpcio-tools==1.22.0
