@@ -47,7 +47,7 @@ def init_movement(body):  # noqa: E501
         for db in d.database:
             for tb in db['tables']:
                 columns = []
-                if not tb['columns']:
+                if not tb.get('columns', None):
                     columns.append('*')
                 else:
                     for column in tb['columns']:

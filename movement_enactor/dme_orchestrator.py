@@ -89,7 +89,15 @@ class DMInitOrchestrator(DMBase):
             fname = self.prepare_filename(query)
             fpath = path + '/' + fname
             request = dal.create_start_data_movement_request(query=query, sharedVolumePath=fpath)
-            dal.send_start_data_movement(request)
+            if conf.asynchronous:
+                dal.send_start_data_movement(request)
+            else:
+                response = dal.send_start_data_movement(request, async=False)
+                if not response:
+                    r = RedisClient()
+                    target_dal = r.get('target_dal')
+                    target_dal_conn = self.connect_to_dal(target_dal)
+                    request = target_dal_conn.create_finish_data_movement_request(query=query, sharedVolumePath=fpath)
 
     def finish_data_movement_for_queries(self, query_list, dal_ip):
         dal = self.connect_to_dal(dal_ip)

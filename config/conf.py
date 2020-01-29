@@ -115,4 +115,5 @@ db_update_es_settings = {
             }
         }
     }
-
+#DAL comm
+asynchronous = True

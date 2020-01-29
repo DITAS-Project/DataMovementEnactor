@@ -75,7 +75,7 @@ class DALClient:
         target_channel = grpc.insecure_channel('{}:{}'.format(target_dal, conf.dal_default_port))
         stub = dal_pb2_grpc.DataMovementServiceStub(target_channel)
         request = self.create_finish_data_movement_request(query=self.query, sharedVolumePath=self.path)
-        self.send_finish_data_movement(stub, request)
+        self.send_finish_data_movement(request, stub=stub)
         LOG.debug('Response received: {}'.format(future.result()))
 
     def send_start_data_movement(self, request, async=True):
@@ -89,10 +89,12 @@ class DALClient:
         except Exception as e:
             LOG.exception('Error sending StartDataMovement gRPC call {}'.format(e))
 
-    @staticmethod
-    def send_finish_data_movement(stub, request):
+    def send_finish_data_movement(self, request, stub=None):
         try:
-            stub.finishDataMovement(request)
+            if not stub:
+                self.stub.finishDataMovement(request)
+            else:
+                stub.finishDataMovement(request)
         except Exception as e:
             LOG.exception('Error sending finishDataMovement gRPC call {}'.format(e))
 
