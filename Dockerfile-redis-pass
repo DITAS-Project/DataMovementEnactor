@@ -1,9 +1,0 @@
-FROM ubuntu:18.04
-
-RUN apt-get update && \
-    apt-get install -y redis-server && \
-    apt-get clean
-
-EXPOSE 30031
-
-CMD ["redis-server", "--requirepass G5i0z%88AUz7XZIFAbAEt0i9E*ONc#ye"]

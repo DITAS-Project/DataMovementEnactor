@@ -53,10 +53,10 @@ class DMContOrchestrator(DMBase):
 class DMInitOrchestrator(DMBase):
 
     def __init__(self, source, dest_vdc_id, dest_infra_id, dal_original_ip, database=None):
-        self.source = source
         self.dest_vdc_id = dest_vdc_id
         self.dest_infra_id = dest_infra_id
-        self.dal_original_ip = dal_original_ip
+        self.dal_original_ip = source
+        self.dal_new_id = dal_original_ip
         self.database = database
         self.blueprint = Blueprint(self.dest_vdc_id)
         self.blueprint_id = self.blueprint.get_concrete_blueprint_id()
@@ -75,7 +75,7 @@ class DMInitOrchestrator(DMBase):
 
     def notify_ds4m_for_new_dal(self, dal_ip):
         ds4m_c = DS4Mclient(endpoint=conf.ds4m_endpoint)
-        response = ds4m_c.notify_new_dal(dal_ip, self.dal_original_ip)
+        response = ds4m_c.notify_new_dal(dal_ip, self.dal_new_id)
         return response
 
     def send_queries_to_dal(self, query_list, dal_ip):
